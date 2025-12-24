@@ -28,3 +28,14 @@ export interface Project {
   github?: string;
   image?: string;
 }
+
+export interface Blog {
+  id: string;
+  title: string;
+  summary: string;
+  content: string;
+  date: string;
+  readTime: string;
+  category: string;
+  image: string;
+}

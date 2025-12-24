@@ -1,5 +1,5 @@
 
-import { SkillCategory, Experience, Project, Education } from './types';
+import { SkillCategory, Experience, Project, Education, Blog } from './types';
 
 export const SKILL_CATEGORIES: SkillCategory[] = [
   {
@@ -93,11 +93,58 @@ export const PROJECTS: Project[] = [
     description: "Built high-traffic platforms for Home Interiors and Renovation. Integrated CIBIL APIs, Comet Chat, and optimized for SEO using SSR/SSG best practices.",
     tech: ["React.js", "SSR", "GA/GTM", "Comet Chat", "Sentry"],
     image: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=1973&auto=format&fit=crop"
+  }
+];
+
+export const BLOGS: Blog[] = [
+  {
+    id: "1",
+    title: "Optimizing Core Web Vitals in 2025",
+    summary: "A deep dive into how we achieved sub-second LCP and near-zero CLS at scale for high-traffic real estate platforms.",
+    content: `Core Web Vitals have become the gold standard for user experience. In this post, I'll share my journey of optimizing performance for NoBroker's dashboard applications. 
+
+### Why Performance Matters
+User retention drops significantly for every 100ms of latency. At NoBroker, we focused on:
+1. **LCP (Largest Contentful Paint)**: Reducing image sizes and optimizing server response times.
+2. **CLS (Cumulative Layout Shift)**: Reserving space for dynamic content to avoid jumps.
+3. **INP (Interaction to Next Paint)**: Ensuring the main thread stays idle for user inputs.
+
+### Techniques Used
+We utilized **Next.js SSR** to pre-render critical content and implemented aggressive image optimization with **next/image**. We also monitored real-user data using **Sentry.io** and **DebugBear** to identify bottlenecks in production.`,
+    date: "March 15, 2024",
+    readTime: "8 min read",
+    category: "Performance",
+    image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2070&auto=format&fit=crop"
   },
   {
-    title: "Internal CRM & CMS",
-    description: "Developed enterprise CRM features including User Management, Spreadsheet uploads with error detection, and a dynamic Mail Template Builder.",
-    tech: ["React Hooks", "Web APIs", "Tailwind CSS", "Role Management"],
-    image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2070&auto=format&fit=crop"
+    id: "2",
+    title: "Scalable State Management with Redux Saga",
+    summary: "Exploring the power of generators in side-effect management for complex fintech applications.",
+    content: `When building Wealth products at Prosperr.io, we needed a robust way to handle multi-step flows and complex API sequences. Redux Saga emerged as the perfect tool.
+
+### Generators and Sagas
+Redux Saga leverages JavaScript generators to make asynchronous code look synchronous. This is particularly useful for:
+- **Debouncing**: Avoiding multiple rapid clicks on 'Invest Now' buttons.
+- **Race Conditions**: Ensuring only the latest search result is displayed.
+- **Error Handling**: Centralizing API failure logic across the app.`,
+    date: "February 28, 2024",
+    readTime: "6 min read",
+    category: "React Architecture",
+    image: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?q=80&w=2070&auto=format&fit=crop"
+  },
+  {
+    id: "3",
+    title: "The Future of SEO: AI and Semantic HTML",
+    summary: "How structured data and semantic markup are evolving in the age of generative search engines.",
+    content: `SEO is no longer just about keywords. Search engines are now understanding intent through structured data and semantic HTML. 
+
+### Best Practices
+- **Schema.org**: Implement JSON-LD for rich results.
+- **Semantic Tags**: Use <article>, <section>, and <nav> correctly.
+- **AIGS (AI-Generated Search)**: Preparing content for LLM ingestion by providing clear headings and summaries.`,
+    date: "January 10, 2024",
+    readTime: "5 min read",
+    category: "SEO",
+    image: "https://images.unsplash.com/photo-1484417894907-623942c8ee29?q=80&w=2032&auto=format&fit=crop"
   }
 ];

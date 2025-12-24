@@ -19,10 +19,14 @@ import {
   MessageSquare,
   Sparkles,
   BookOpen,
-  GraduationCap
+  GraduationCap,
+  ArrowLeft,
+  Calendar,
+  Clock
 } from 'lucide-react';
-import { SKILL_CATEGORIES, EXPERIENCES, PROJECTS, EDUCATION_DATA } from './constants';
+import { SKILL_CATEGORIES, EXPERIENCES, PROJECTS, EDUCATION_DATA, BLOGS } from './constants';
 import { GoogleGenAI } from '@google/genai';
+import { Blog } from './types';
 
 // Persistent Floating AI Chat Component
 const FloatingAIChat: React.FC<{ forcedOpen?: boolean; setForcedOpen?: (v: boolean) => void }> = ({ forcedOpen, setForcedOpen }) => {
@@ -251,16 +255,120 @@ const RotatingHeader: React.FC = () => {
   );
 };
 
+// --- BLOG COMPONENTS ---
+
+const BlogCard: React.FC<{ blog: Blog; onClick: () => void }> = ({ blog, onClick }) => (
+  <div 
+    onClick={onClick}
+    className="glass-card rounded-3xl overflow-hidden group cursor-pointer hover:border-blue-500/50 transition-all"
+  >
+    <div className="aspect-[16/9] overflow-hidden">
+      <img 
+        src={blog.image} 
+        alt={blog.title} 
+        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
+      />
+    </div>
+    <div className="p-6">
+      <div className="flex items-center gap-3 mb-4">
+        <span className="px-3 py-1 bg-blue-500/10 text-blue-400 text-[10px] font-black uppercase tracking-widest rounded-full border border-blue-500/20">
+          {blog.category}
+        </span>
+        <span className="text-[10px] text-gray-500 uppercase font-black">{blog.date}</span>
+      </div>
+      <h3 className="text-xl font-black mb-3 group-hover:text-blue-500 transition-colors uppercase tracking-tight">{blog.title}</h3>
+      <p className="text-gray-400 text-sm mb-6 line-clamp-2">{blog.summary}</p>
+      <div className="flex items-center justify-between">
+        <span className="flex items-center gap-2 text-[10px] text-gray-500 uppercase font-black">
+          <Clock size={12} /> {blog.readTime}
+        </span>
+        <span className="text-blue-500 group-hover:translate-x-1 transition-transform">
+          <ChevronRight size={18} />
+        </span>
+      </div>
+    </div>
+  </div>
+);
+
+const BlogDetailView: React.FC<{ blog: Blog; onBack: () => void }> = ({ blog, onBack }) => {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  return (
+    <div className="pt-32 pb-24 px-4 max-w-4xl mx-auto animate-in fade-in slide-in-from-bottom-4">
+      <button 
+        onClick={onBack}
+        className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors mb-12 group"
+      >
+        <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" /> 
+        <span className="text-sm font-black uppercase tracking-widest">Back to Blogs</span>
+      </button>
+
+      <div className="mb-8 flex items-center gap-4">
+        <span className="px-4 py-1 bg-blue-500/10 text-blue-400 text-xs font-black uppercase tracking-widest rounded-full border border-blue-500/20">
+          {blog.category}
+        </span>
+        <div className="flex items-center gap-6 text-gray-500 text-xs font-black uppercase tracking-widest">
+          <span className="flex items-center gap-2"><Calendar size={14} /> {blog.date}</span>
+          <span className="flex items-center gap-2"><Clock size={14} /> {blog.readTime}</span>
+        </div>
+      </div>
+
+      <h1 className="text-4xl md:text-6xl font-black mb-12 tracking-tighter leading-tight uppercase">
+        {blog.title}
+      </h1>
+
+      <div className="aspect-video rounded-[3rem] overflow-hidden mb-16 shadow-2xl">
+        <img src={blog.image} alt={blog.title} className="w-full h-full object-cover" />
+      </div>
+
+      <div className="prose prose-invert prose-blue max-w-none">
+        <div className="text-xl text-gray-300 font-light leading-relaxed whitespace-pre-wrap">
+          {blog.content}
+        </div>
+      </div>
+
+      <div className="mt-20 pt-12 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-8">
+        <div className="flex items-center gap-4">
+          <div className="w-16 h-16 rounded-full bg-blue-600 flex items-center justify-center font-black text-2xl">R</div>
+          <div>
+            <p className="font-black uppercase tracking-widest text-white">Rohan Patel</p>
+            <p className="text-sm text-gray-500 uppercase tracking-widest font-black">SDE-2 @ Prosperr.io</p>
+          </div>
+        </div>
+        <div className="flex gap-4">
+           <a href="https://linkedin.com/in/patelrohan224" className="w-12 h-12 glass-card rounded-2xl flex items-center justify-center hover:text-blue-500 transition-colors"><Linkedin size={20} /></a>
+           <a href="https://github.com/patelrohan224" className="w-12 h-12 glass-card rounded-2xl flex items-center justify-center hover:text-blue-500 transition-colors"><Github size={20} /></a>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// --- MAIN APP ---
+
 const App: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [aiForcedOpen, setAiForcedOpen] = useState(false);
+  
+  // Basic Navigation State
+  const [view, setView] = useState<'portfolio' | 'blogs' | 'blog-detail'>('portfolio');
+  const [selectedBlogId, setSelectedBlogId] = useState<string | null>(null);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  const navigateToBlog = (id: string) => {
+    setSelectedBlogId(id);
+    setView('blog-detail');
+  };
+
+  const selectedBlog = BLOGS.find(b => b.id === selectedBlogId);
 
   return (
     <div className="min-h-screen bg-[#030712] text-gray-100 selection:bg-blue-500/30">
@@ -269,16 +377,31 @@ const App: React.FC = () => {
       {/* Navigation */}
       <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'bg-[#030712]/80 backdrop-blur-md border-b border-white/10 py-4' : 'bg-transparent py-6'}`}>
         <div className="max-w-7xl mx-auto px-4 flex justify-between items-center">
-          <div className="text-2xl font-black tracking-tighter">
+          <div 
+            className="text-2xl font-black tracking-tighter cursor-pointer"
+            onClick={() => setView('portfolio')}
+          >
             ROHAN<span className="text-blue-500">.</span>PATEL
           </div>
 
           <div className="hidden md:flex items-center gap-8 text-sm font-medium uppercase tracking-widest text-gray-400">
-            {['About', 'Skills', 'Experience', 'Projects', 'Contact'].map((item) => (
-              <a key={item} href={`#${item.toLowerCase()}`} className="hover:text-white transition-colors">
-                {item}
-              </a>
-            ))}
+            {view === 'portfolio' ? (
+              <>
+                {['About', 'Skills', 'Experience', 'Projects', 'Contact'].map((item) => (
+                  <a key={item} href={`#${item.toLowerCase()}`} className="hover:text-white transition-colors">
+                    {item}
+                  </a>
+                ))}
+                <button onClick={() => setView('blogs')} className="hover:text-white transition-colors text-blue-500 font-black underline underline-offset-8">
+                  Blogs
+                </button>
+              </>
+            ) : (
+              <>
+                <button onClick={() => setView('portfolio')} className="hover:text-white transition-colors">Portfolio Home</button>
+                <button onClick={() => setView('blogs')} className={`hover:text-white transition-colors ${view === 'blogs' ? 'text-blue-500 font-black' : ''}`}>All Blogs</button>
+              </>
+            )}
           </div>
 
           <div className="md:hidden">
@@ -290,7 +413,9 @@ const App: React.FC = () => {
 
         {isMenuOpen && (
           <div className="md:hidden absolute top-full left-0 right-0 bg-[#030712] border-b border-white/10 p-6 flex flex-col gap-4 animate-in fade-in slide-in-from-top-2">
-            {['About', 'Skills', 'Experience', 'Projects', 'Contact'].map((item) => (
+            <button onClick={() => { setView('portfolio'); setIsMenuOpen(false); }} className="text-left text-lg font-bold">Portfolio</button>
+            <button onClick={() => { setView('blogs'); setIsMenuOpen(false); }} className="text-left text-lg font-bold text-blue-500">Blogs</button>
+            {view === 'portfolio' && ['About', 'Skills', 'Experience', 'Projects', 'Contact'].map((item) => (
               <a key={item} href={`#${item.toLowerCase()}`} className="text-lg font-bold" onClick={() => setIsMenuOpen(false)}>
                 {item}
               </a>
@@ -299,183 +424,234 @@ const App: React.FC = () => {
         )}
       </nav>
 
-      {/* Hero Section */}
-      <section className="pt-32 pb-20 md:pt-48 md:pb-32 px-4 relative overflow-hidden">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-blue-600/10 blur-[120px] rounded-full -z-10"></div>
-        <div className="max-w-7xl mx-auto flex flex-col items-center text-center">
-          <div className="inline-flex items-center gap-2 bg-blue-500/10 text-blue-400 px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest mb-8 border border-blue-500/20">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
-            </span>
-            SDE-2 • UI/UX Specialist
-          </div>
-          <h1 className="text-5xl md:text-8xl font-black mb-6 tracking-tight leading-[1.1]">
-            Building scalable <br />
-            <RotatingHeader /> code.
-          </h1>
-          <p className="max-w-2xl text-lg md:text-xl text-gray-400 mb-10 leading-relaxed font-light">
-            Crafting pixel-perfect, ultra-fast web architectures 
-            at <span className="text-white font-medium">Prosperr.io</span> and <span className="text-white font-medium">NoBroker.com</span>. Focused on LCP, CLS, and FID optimization.
-          </p>
-          <div className="flex flex-wrap justify-center gap-4">
-            <button onClick={() => setAiForcedOpen(true)} className="bg-blue-600 text-white px-8 py-4 rounded-full font-bold hover:bg-blue-500 transition-all flex items-center gap-2 shadow-lg shadow-blue-600/20 active:scale-95">
-              Chat with My AI <MessageSquare size={20} />
-            </button>
-            <a href="#projects" className="bg-white/5 border border-white/10 px-8 py-4 rounded-full font-bold hover:bg-white/10 transition-all flex items-center gap-2 active:scale-95">
-              See My Works <ExternalLink size={20} />
-            </a>
-          </div>
-        </div>
-      </section>
-
-      {/* Skills */}
-      <section id="skills" className="py-24 px-4 bg-gray-900/30">
-        <div className="max-w-7xl mx-auto text-center">
-          <p className="text-blue-500 font-mono text-sm mb-4 uppercase tracking-[0.3em]">/ core stack</p>
-          <h2 className="text-4xl md:text-6xl font-black mb-20 uppercase tracking-tighter">Stack & Expertise</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {SKILL_CATEGORIES.map((cat, idx) => (
-              <div key={idx} className="glass-card p-10 rounded-[2.5rem] hover:translate-y-[-8px] transition-all duration-300 text-left border-t border-white/5">
-                <div className="w-12 h-12 bg-blue-500/10 rounded-2xl flex items-center justify-center text-blue-500 mb-8 border border-blue-500/20">
-                   {idx % 3 === 0 ? <Layout size={24} /> : idx % 3 === 1 ? <Zap size={24} /> : <Code2 size={24} />}
-                </div>
-                <h3 className="text-xl font-black mb-6 text-white uppercase tracking-widest">
-                  {cat.title}
-                </h3>
-                <div className="flex flex-wrap gap-2">
-                  {cat.skills.map(skill => (
-                    <span key={skill} className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:border-blue-500/30 transition-colors">
-                      {skill}
-                    </span>
-                  ))}
-                </div>
+      {/* Main Content Router */}
+      {view === 'portfolio' ? (
+        <main className="animate-in fade-in duration-500">
+          {/* Hero Section */}
+          <section className="pt-32 pb-20 md:pt-48 md:pb-32 px-4 relative overflow-hidden">
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-blue-600/10 blur-[120px] rounded-full -z-10"></div>
+            <div className="max-w-7xl mx-auto flex flex-col items-center text-center">
+              <div className="inline-flex items-center gap-2 bg-blue-500/10 text-blue-400 px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest mb-8 border border-blue-500/20">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                </span>
+                SDE-2 • UI/UX Specialist
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Experience Timeline */}
-      <section id="experience" className="py-24 px-4 overflow-hidden">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-24">
-            <p className="text-blue-500 font-mono text-sm mb-4 uppercase tracking-[0.3em]">/ professional history</p>
-            <h2 className="text-5xl md:text-7xl font-black tracking-tighter uppercase mb-4">The Journey</h2>
-            <div className="w-24 h-2 bg-gradient-to-r from-blue-500 to-purple-500 mx-auto rounded-full"></div>
-          </div>
-          
-          <ExperienceTimeline />
-        </div>
-      </section>
-
-      {/* Featured Projects */}
-      <section id="projects" className="py-24 px-4 bg-gray-900/30">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col md:flex-row justify-between items-center mb-20 gap-4">
-            <div>
-              <p className="text-blue-500 font-mono text-sm mb-2 uppercase tracking-[0.3em]">/ lab experiments</p>
-              <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tighter">Selected Works</h2>
-            </div>
-            <a href="https://github.com/patelrohan224" target="_blank" className="bg-white/5 px-6 py-3 rounded-2xl text-gray-300 hover:text-white transition-colors flex items-center gap-3 text-sm font-bold border border-white/10">
-              Explore Github <Github size={18} />
-            </a>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-10">
-            {PROJECTS.map((project, idx) => (
-              <div key={idx} className="flex flex-col h-full glass-card rounded-[2.5rem] overflow-hidden group">
-                <div className="aspect-video bg-gray-800 relative overflow-hidden">
-                  <img src={project.image} alt={project.title} className="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-700" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#030712] via-transparent to-transparent opacity-80"></div>
-                  <div className="absolute top-6 left-6 flex flex-wrap gap-2">
-                    {project.tech.slice(0, 4).map(t => (
-                      <span key={t} className="bg-blue-600/20 backdrop-blur-md text-blue-400 border border-blue-500/30 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider">
-                        {t}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-                <div className="p-10 flex flex-col flex-1">
-                  <h3 className="text-3xl font-black mb-4 group-hover:text-blue-400 transition-colors uppercase tracking-tight">{project.title}</h3>
-                  <p className="text-gray-400 text-sm mb-8 leading-relaxed font-light">
-                    {project.description}
-                  </p>
-                  <div className="flex items-center justify-between mt-auto">
-                    <a href={project.link} className="inline-flex items-center gap-3 text-xs font-black uppercase tracking-widest text-white hover:text-blue-400 transition-all group/link">
-                      Launch Case Study <ChevronRight size={16} className="group-hover/link:translate-x-1 transition-transform" />
-                    </a>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Footer / Contact */}
-      <footer id="contact" className="pt-32 pb-12 px-4 border-t border-white/5 relative overflow-hidden">
-        <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-blue-600/10 blur-[120px] rounded-full"></div>
-        <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col lg:flex-row justify-between items-start gap-16 mb-24">
-            <div className="max-w-2xl">
-              <h2 className="text-5xl md:text-7xl font-black mb-8 uppercase tracking-tighter leading-none">
-                Let's build something <br />
-                <span className="text-blue-500">exceptional.</span>
-              </h2>
-              <p className="text-xl text-gray-400 mb-12 font-light leading-relaxed">
-                Currently building high-performance financial interfaces at Prosperr.io. 
-                Always open to technical discussions or collaborative builds.
+              <h1 className="text-5xl md:text-8xl font-black mb-6 tracking-tight leading-[1.1]">
+                Building scalable <br />
+                <RotatingHeader /> code.
+              </h1>
+              <p className="max-w-2xl text-lg md:text-xl text-gray-400 mb-10 leading-relaxed font-light">
+                Crafting pixel-perfect, ultra-fast web architectures 
+                at <span className="text-white font-medium">Prosperr.io</span> and <span className="text-white font-medium">NoBroker.com</span>. Focused on LCP, CLS, and FID optimization.
               </p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <a href="mailto:rohanpateloff@gmail.com" className="flex items-center gap-4 p-6 glass-card rounded-3xl hover:border-blue-500/50 transition-all group">
-                  <div className="w-12 h-12 bg-blue-500/10 rounded-2xl flex items-center justify-center text-blue-500 group-hover:bg-blue-500 group-hover:text-white transition-all">
-                    <Mail size={24} />
+              <div className="flex flex-wrap justify-center gap-4">
+                <button onClick={() => setAiForcedOpen(true)} className="bg-blue-600 text-white px-8 py-4 rounded-full font-bold hover:bg-blue-500 transition-all flex items-center gap-2 shadow-lg shadow-blue-600/20 active:scale-95">
+                  Chat with My AI <MessageSquare size={20} />
+                </button>
+                <button onClick={() => setView('blogs')} className="bg-white/5 border border-white/10 px-8 py-4 rounded-full font-bold hover:bg-white/10 transition-all flex items-center gap-2 active:scale-95">
+                  Read My Blogs <BookOpen size={20} />
+                </button>
+              </div>
+            </div>
+          </section>
+
+          {/* Skills */}
+          <section id="skills" className="py-24 px-4 bg-gray-900/30">
+            <div className="max-w-7xl mx-auto text-center">
+              <p className="text-blue-500 font-mono text-sm mb-4 uppercase tracking-[0.3em]">/ core stack</p>
+              <h2 className="text-4xl md:text-6xl font-black mb-20 uppercase tracking-tighter">Stack & Expertise</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {SKILL_CATEGORIES.map((cat, idx) => (
+                  <div key={idx} className="glass-card p-10 rounded-[2.5rem] hover:translate-y-[-8px] transition-all duration-300 text-left border-t border-white/5">
+                    <div className="w-12 h-12 bg-blue-500/10 rounded-2xl flex items-center justify-center text-blue-500 mb-8 border border-blue-500/20">
+                       {idx % 3 === 0 ? <Layout size={24} /> : idx % 3 === 1 ? <Zap size={24} /> : <Code2 size={24} />}
+                    </div>
+                    <h3 className="text-xl font-black mb-6 text-white uppercase tracking-widest">
+                      {cat.title}
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                      {cat.skills.map(skill => (
+                        <span key={skill} className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-xs font-bold text-gray-400 hover:text-white hover:border-blue-500/30 transition-colors">
+                          {skill}
+                        </span>
+                      ))}
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Write to me</p>
-                    <p className="font-bold truncate">rohanpateloff@gmail.com</p>
-                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* Experience Timeline */}
+          <section id="experience" className="py-24 px-4 overflow-hidden">
+            <div className="max-w-7xl mx-auto">
+              <div className="text-center mb-24">
+                <p className="text-blue-500 font-mono text-sm mb-4 uppercase tracking-[0.3em]">/ professional history</p>
+                <h2 className="text-5xl md:text-7xl font-black tracking-tighter uppercase mb-4">The Journey</h2>
+                <div className="w-24 h-2 bg-gradient-to-r from-blue-500 to-purple-500 mx-auto rounded-full"></div>
+              </div>
+              <ExperienceTimeline />
+            </div>
+          </section>
+
+          {/* Featured Projects */}
+          <section id="projects" className="py-24 px-4 bg-gray-900/30">
+            <div className="max-w-7xl mx-auto">
+              <div className="flex flex-col md:flex-row justify-between items-center mb-20 gap-4">
+                <div>
+                  <p className="text-blue-500 font-mono text-sm mb-2 uppercase tracking-[0.3em]">/ lab experiments</p>
+                  <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tighter">Selected Works</h2>
+                </div>
+                <a href="https://github.com/patelrohan224" target="_blank" className="bg-white/5 px-6 py-3 rounded-2xl text-gray-300 hover:text-white transition-colors flex items-center gap-3 text-sm font-bold border border-white/10">
+                  Explore Github <Github size={18} />
                 </a>
-                <div className="flex items-center gap-4 p-6 glass-card rounded-3xl">
-                  <div className="w-12 h-12 bg-purple-500/10 rounded-2xl flex items-center justify-center text-purple-500">
-                    <MapPin size={24} />
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-10">
+                {PROJECTS.map((project, idx) => (
+                  <div key={idx} className="flex flex-col h-full glass-card rounded-[2.5rem] overflow-hidden group">
+                    <div className="aspect-video bg-gray-800 relative overflow-hidden">
+                      <img src={project.image} alt={project.title} className="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-700" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-[#030712] via-transparent to-transparent opacity-80"></div>
+                      <div className="absolute top-6 left-6 flex flex-wrap gap-2">
+                        {project.tech.slice(0, 4).map(t => (
+                          <span key={t} className="bg-blue-600/20 backdrop-blur-md text-blue-400 border border-blue-500/30 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider">
+                            {t}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="p-10 flex flex-col flex-1">
+                      <h3 className="text-3xl font-black mb-4 group-hover:text-blue-400 transition-colors uppercase tracking-tight">{project.title}</h3>
+                      <p className="text-gray-400 text-sm mb-8 leading-relaxed font-light">
+                        {project.description}
+                      </p>
+                      <div className="flex items-center justify-between mt-auto">
+                        <a href={project.link} className="inline-flex items-center gap-3 text-xs font-black uppercase tracking-widest text-white hover:text-blue-400 transition-all group/link">
+                          Launch Case Study <ChevronRight size={16} className="group-hover/link:translate-x-1 transition-transform" />
+                        </a>
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Base</p>
-                    <p className="font-bold">Bengaluru, India</p>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* Recent Blogs Section */}
+          <section id="blogs" className="py-24 px-4 bg-[#030712] relative overflow-hidden">
+            <div className="absolute top-1/2 right-0 w-[500px] h-[500px] bg-purple-600/5 blur-[120px] rounded-full -z-10"></div>
+            <div className="max-w-7xl mx-auto">
+              <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
+                <div>
+                  <p className="text-blue-500 font-mono text-sm mb-2 uppercase tracking-[0.3em]">/ knowledge sharing</p>
+                  <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tighter">Recent Articles</h2>
+                </div>
+                <button 
+                  onClick={() => setView('blogs')}
+                  className="px-8 py-3 bg-white/5 border border-white/10 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-white/10 transition-all"
+                >
+                  View All Blogs
+                </button>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                {BLOGS.slice(0, 3).map(blog => (
+                  <BlogCard key={blog.id} blog={blog} onClick={() => navigateToBlog(blog.id)} />
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* Footer Section */}
+          <footer id="contact" className="pt-32 pb-12 px-4 border-t border-white/5 relative overflow-hidden">
+            <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-blue-600/10 blur-[120px] rounded-full"></div>
+            <div className="max-w-7xl mx-auto">
+              <div className="flex flex-col lg:flex-row justify-between items-start gap-16 mb-24">
+                <div className="max-w-2xl">
+                  <h2 className="text-5xl md:text-7xl font-black mb-8 uppercase tracking-tighter leading-none">
+                    Let's build something <br />
+                    <span className="text-blue-500">exceptional.</span>
+                  </h2>
+                  <p className="text-xl text-gray-400 mb-12 font-light leading-relaxed">
+                    Currently building high-performance financial interfaces at Prosperr.io. 
+                    Always open to technical discussions or collaborative builds.
+                  </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <a href="mailto:rohanpateloff@gmail.com" className="flex items-center gap-4 p-6 glass-card rounded-3xl hover:border-blue-500/50 transition-all group">
+                      <div className="w-12 h-12 bg-blue-500/10 rounded-2xl flex items-center justify-center text-blue-500 group-hover:bg-blue-500 group-hover:text-white transition-all">
+                        <Mail size={24} />
+                      </div>
+                      <div>
+                        <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Write to me</p>
+                        <p className="font-bold truncate">rohanpateloff@gmail.com</p>
+                      </div>
+                    </a>
+                    <div className="flex items-center gap-4 p-6 glass-card rounded-3xl">
+                      <div className="w-12 h-12 bg-purple-500/10 rounded-2xl flex items-center justify-center text-purple-500">
+                        <MapPin size={24} />
+                      </div>
+                      <div>
+                        <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Base</p>
+                        <p className="font-bold">Bengaluru, India</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="flex gap-20">
+                  <div className="flex flex-col gap-6">
+                    <h4 className="text-xs font-black uppercase tracking-[0.3em] text-blue-500">Socials</h4>
+                    <a href="https://linkedin.com/in/patelrohan224" target="_blank" className="text-lg font-bold hover:text-white text-gray-400 transition-colors">LinkedIn</a>
+                    <a href="https://github.com/patelrohan224" target="_blank" className="text-lg font-bold hover:text-white text-gray-400 transition-colors">GitHub</a>
+                  </div>
+                  <div className="flex flex-col gap-6">
+                    <h4 className="text-xs font-black uppercase tracking-[0.3em] text-blue-500">Navigate</h4>
+                    <a href="#skills" className="text-lg font-bold hover:text-white text-gray-400 transition-colors">Skills</a>
+                    <a href="#experience" className="text-lg font-bold hover:text-white text-gray-400 transition-colors">History</a>
+                    <a href="#projects" className="text-lg font-bold hover:text-white text-gray-400 transition-colors">Works</a>
                   </div>
                 </div>
               </div>
-            </div>
-            
-            <div className="flex gap-20">
-              <div className="flex flex-col gap-6">
-                <h4 className="text-xs font-black uppercase tracking-[0.3em] text-blue-500">Socials</h4>
-                <a href="https://linkedin.com/in/patelrohan224" target="_blank" className="text-lg font-bold hover:text-white text-gray-400 transition-colors">LinkedIn</a>
-                <a href="https://github.com/patelrohan224" target="_blank" className="text-lg font-bold hover:text-white text-gray-400 transition-colors">GitHub</a>
-              </div>
-              <div className="flex flex-col gap-6">
-                <h4 className="text-xs font-black uppercase tracking-[0.3em] text-blue-500">Navigate</h4>
-                <a href="#skills" className="text-lg font-bold hover:text-white text-gray-400 transition-colors">Skills</a>
-                <a href="#experience" className="text-lg font-bold hover:text-white text-gray-400 transition-colors">History</a>
-                <a href="#projects" className="text-lg font-bold hover:text-white text-gray-400 transition-colors">Works</a>
+              <div className="flex flex-col md:flex-row justify-between items-center pt-12 border-t border-white/5 text-gray-500 text-[10px] font-mono uppercase tracking-[0.2em] gap-6">
+                <div className="flex items-center gap-2">
+                   <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                   Status: Actively Coding Performance
+                </div>
+                <div>© {new Date().getFullYear()} Rohan Patel. Handcrafted with React.</div>
+                <div className="flex items-center gap-6">
+                  <span className="flex items-center gap-2 text-blue-400"><Sparkles size={14} /> Powered by Gemini-3</span>
+                </div>
               </div>
             </div>
+          </footer>
+        </main>
+      ) : view === 'blogs' ? (
+        <main className="pt-32 pb-24 px-4 max-w-7xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <div className="mb-20 text-center">
+            <p className="text-blue-500 font-mono text-sm mb-4 uppercase tracking-[0.3em]">/ articles & insights</p>
+            <h1 className="text-5xl md:text-7xl font-black tracking-tighter uppercase mb-6">The Blog</h1>
+            <p className="text-gray-400 max-w-2xl mx-auto font-light leading-relaxed">
+              Sharing my experiences in performance tuning, React architecture, and building user-centric financial platforms.
+            </p>
           </div>
-          
-          <div className="flex flex-col md:flex-row justify-between items-center pt-12 border-t border-white/5 text-gray-500 text-[10px] font-mono uppercase tracking-[0.2em] gap-6">
-            <div className="flex items-center gap-2">
-               <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-               Status: Actively Coding Performance
-            </div>
-            <div>© {new Date().getFullYear()} Rohan Patel. Handcrafted with React.</div>
-            <div className="flex items-center gap-6">
-              <span className="flex items-center gap-2 text-blue-400"><Sparkles size={14} /> Powered by Gemini-3</span>
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {BLOGS.map(blog => (
+              <BlogCard key={blog.id} blog={blog} onClick={() => navigateToBlog(blog.id)} />
+            ))}
           </div>
-        </div>
-      </footer>
+          <div className="mt-32 text-center p-20 glass-card rounded-[3rem] border-dashed border-2 border-white/10">
+             <h3 className="text-2xl font-black uppercase tracking-tight mb-4">Subscribe for Updates</h3>
+             <p className="text-gray-400 mb-8 max-w-md mx-auto">Get notified when I release new articles on performance and frontend architecture.</p>
+             <form className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
+               <input type="email" placeholder="email@example.com" className="bg-white/5 border border-white/10 rounded-2xl px-6 py-3 flex-1 focus:outline-none focus:border-blue-500 transition-all" />
+               <button className="bg-blue-600 px-8 py-3 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-blue-500 transition-all">Join</button>
+             </form>
+          </div>
+        </main>
+      ) : (
+        selectedBlog && <BlogDetailView blog={selectedBlog} onBack={() => setView('blogs')} />
+      )}
     </div>
   );
 }
