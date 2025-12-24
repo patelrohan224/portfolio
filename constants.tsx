@@ -67,16 +67,4 @@ export const PROJECTS: Project[] = [
     link: "#",
     image: "https://picsum.photos/seed/compiler/800/450"
   },
-  {
-    title: "B2B Wealth Platforms",
-    description: "Led development of Mutual Fund, Super Saver (tax-saving), and internal CMS at Prosperr.io. Focused on multi-step forms and secure document handling.",
-    tech: ["Next.js", "Redux-Saga", "Styled-Components", "SSR"],
-    image: "https://picsum.photos/seed/wealth/800/450"
-  },
-  {
-    title: "Home Services Platforms",
-    description: "Core implementation for Home Interiors, Renovation, and Home Loan platforms at NoBroker. Integrated CIBIL API and real-time data handling.",
-    tech: ["React.js", "Comet Chat", "GA/GTM", "Context API"],
-    image: "https://picsum.photos/seed/nobroker/800/450"
-  }
 ];
