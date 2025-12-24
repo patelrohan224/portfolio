@@ -1,5 +1,5 @@
 
-import { SkillCategory, Experience, Project } from './types';
+import { SkillCategory, Experience, Project, Education } from './types';
 
 export const SKILL_CATEGORIES: SkillCategory[] = [
   {
@@ -53,18 +53,51 @@ export const EXPERIENCES: Experience[] = [
       "Implemented SSR for faster page rendering, improving overall user experience.",
       "Monitored performance metrics (LCP, CLS, FCP) and resolved issues via Sentry.",
       "Introduced calculation tools, chat modules, and mail template builders.",
-      "Managed UI work for a pod, collaborating with cross-functional teams to reduce operating costs."
+      "Managed UI work for a pod, collaborating with business and development teams."
     ],
     awards: "Rising Star Performer"
+  }
+];
+
+export const EDUCATION_DATA: Education[] = [
+  {
+    degree: "Bachelor of Engineering in Computer Engineering",
+    institution: "LDRP Institute of Technology and Research",
+    period: "May 2021",
+    details: "First Class with Distinction"
+  },
+  {
+    degree: "Class 12th (PCM)",
+    institution: "Gujarat Secondary & Higher Secondary School",
+    period: "May 2017",
+    details: "Gujarat, India"
   }
 ];
 
 export const PROJECTS: Project[] = [
   {
     title: "JavaScript Compiler & Editor",
-    description: "Online JavaScript Editor with custom engine support. Features an AST visualizer and memory visualization showcasing stack and heap memory allocations.",
+    description: "Online JavaScript Editor with custom engine support. Features an AST visualizer and memory visualization showcasing stack and heap memory allocations for learning JS internals.",
     tech: ["React.js", "Next.js", "Tailwind CSS", "Custom JS Engine"],
-    link: "#",
-    image: "https://picsum.photos/seed/compiler/800/450"
+    link: "https://github.com/patelrohan224",
+    image: "https://images.unsplash.com/photo-1516116216624-53e697fedbea?q=80&w=2128&auto=format&fit=crop"
   },
+  {
+    title: "Wealth & Tax Platforms",
+    description: "Led frontend development for Mutual Fund onboarding, Super Saver tax journeys, and Reimbursement workflows with complex multi-step forms and document tracking.",
+    tech: ["Next.js", "Redux-Saga", "Context API", "Styled-Components"],
+    image: "https://images.unsplash.com/photo-1611974714024-4607a55746ee?q=80&w=2070&auto=format&fit=crop"
+  },
+  {
+    title: "Real Estate Ecosystems",
+    description: "Built high-traffic platforms for Home Interiors and Renovation. Integrated CIBIL APIs, Comet Chat, and optimized for SEO using SSR/SSG best practices.",
+    tech: ["React.js", "SSR", "GA/GTM", "Comet Chat", "Sentry"],
+    image: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=1973&auto=format&fit=crop"
+  },
+  {
+    title: "Internal CRM & CMS",
+    description: "Developed enterprise CRM features including User Management, Spreadsheet uploads with error detection, and a dynamic Mail Template Builder.",
+    tech: ["React Hooks", "Web APIs", "Tailwind CSS", "Role Management"],
+    image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2070&auto=format&fit=crop"
+  }
 ];

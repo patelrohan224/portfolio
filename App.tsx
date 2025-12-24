@@ -17,18 +17,24 @@ import {
   X,
   Send,
   MessageSquare,
-  Sparkles
+  Sparkles,
+  BookOpen,
+  GraduationCap
 } from 'lucide-react';
-import { SKILL_CATEGORIES, EXPERIENCES, PROJECTS } from './constants';
+import { SKILL_CATEGORIES, EXPERIENCES, PROJECTS, EDUCATION_DATA } from './constants';
 import { GoogleGenAI } from '@google/genai';
 
 // Persistent Floating AI Chat Component
-const FloatingAIChat: React.FC = () => {
+const FloatingAIChat: React.FC<{ forcedOpen?: boolean; setForcedOpen?: (v: boolean) => void }> = ({ forcedOpen, setForcedOpen }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [messages, setMessages] = useState<{role: 'user' | 'ai', text: string}[]>([]);
   const [loading, setLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (forcedOpen) setIsOpen(true);
+  }, [forcedOpen]);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -50,7 +56,8 @@ const FloatingAIChat: React.FC = () => {
       const prompt = `
         You are Rohan Patel's Personal AI Agent. 
         Context: Rohan is an SDE-2 at Prosperr.io, previously at NoBroker.com. 
-        Expertise: React, Next.js, Performance Optimization, UI/UX.
+        Expertise: React, Next.js, Performance Optimization (Core Web Vitals), SEO.
+        Education: B.E. in Computer Engineering with Distinction.
         Awards: Extra Miler, Rising Star.
         Answer professionally and concisely to this query about Rohan: "${userMsg}"
       `;
@@ -68,6 +75,11 @@ const FloatingAIChat: React.FC = () => {
     }
   };
 
+  const closeChat = () => {
+    setIsOpen(false);
+    if (setForcedOpen) setForcedOpen(false);
+  };
+
   return (
     <div className="fixed bottom-6 right-6 z-[100] font-sans">
       {isOpen ? (
@@ -82,7 +94,7 @@ const FloatingAIChat: React.FC = () => {
                 <p className="text-[10px] text-blue-400 uppercase tracking-widest font-bold">Online</p>
               </div>
             </div>
-            <button onClick={() => setIsOpen(false)} className="text-gray-400 hover:text-white p-1">
+            <button onClick={closeChat} className="text-gray-400 hover:text-white p-1">
               <X size={20} />
             </button>
           </div>
@@ -91,7 +103,7 @@ const FloatingAIChat: React.FC = () => {
             {messages.length === 0 && (
               <div className="text-center py-10 opacity-50">
                 <Sparkles size={32} className="mx-auto mb-2 text-blue-500" />
-                <p className="text-sm">Ask me anything about Rohan's experience, skills, or projects!</p>
+                <p className="text-sm">Ask me about Rohan's skills, experience, or project stack!</p>
               </div>
             )}
             {messages.map((m, i) => (
@@ -123,7 +135,7 @@ const FloatingAIChat: React.FC = () => {
               type="text" 
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Type a message..."
+              placeholder="Ask anything..."
               className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-blue-500 transition-colors"
             />
             <button 
@@ -150,18 +162,15 @@ const FloatingAIChat: React.FC = () => {
 const ExperienceTimeline: React.FC = () => {
   return (
     <div className="relative">
-      {/* Vertical Central Line */}
       <div className="absolute left-6 md:left-1/2 md:-translate-x-1/2 top-0 bottom-0 w-[2px] bg-gradient-to-b from-blue-500 via-purple-500 to-transparent"></div>
 
       <div className="space-y-24">
         {EXPERIENCES.map((exp, idx) => (
           <div key={idx} className={`relative flex flex-col md:flex-row items-center justify-between w-full ${idx % 2 === 0 ? 'md:flex-row-reverse' : ''}`}>
-            {/* Timeline Dot */}
             <div className="absolute left-6 md:left-1/2 md:-translate-x-1/2 top-0 w-12 h-12 bg-[#030712] border-2 border-blue-500 rounded-full z-10 flex items-center justify-center shadow-[0_0_15px_rgba(59,130,246,0.5)]">
                <span className="text-blue-500 font-black text-xs">{EXPERIENCES.length - idx}</span>
             </div>
 
-            {/* Content Card */}
             <div className="w-full md:w-[45%] ml-16 md:ml-0">
               <div className="glass-card p-8 rounded-[2rem] hover:border-blue-500/50 transition-all group relative">
                 <div className="absolute -top-3 -right-3 px-4 py-1 bg-blue-600 rounded-full text-[10px] font-black tracking-widest uppercase">
@@ -188,11 +197,34 @@ const ExperienceTimeline: React.FC = () => {
               </div>
             </div>
 
-            {/* Background Year for Design Depth */}
             <div className="hidden md:block w-[45%] pointer-events-none select-none">
               <div className="text-[8rem] font-black text-white/[0.03] leading-none">
                 {exp.period.slice(0, 4)}
               </div>
+            </div>
+          </div>
+        ))}
+        
+        {/* Education Timeline Entry */}
+        {EDUCATION_DATA.map((edu, idx) => (
+          <div key={`edu-${idx}`} className={`relative flex flex-col md:flex-row items-center justify-between w-full ${idx % 2 !== 0 ? 'md:flex-row-reverse' : ''}`}>
+            <div className="absolute left-6 md:left-1/2 md:-translate-x-1/2 top-0 w-12 h-12 bg-[#030712] border-2 border-purple-500 rounded-full z-10 flex items-center justify-center shadow-[0_0_15px_rgba(168,85,247,0.5)]">
+               <GraduationCap size={20} className="text-purple-500" />
+            </div>
+
+            <div className="w-full md:w-[45%] ml-16 md:ml-0">
+              <div className="glass-card p-8 rounded-[2rem] hover:border-purple-500/50 transition-all group relative border-purple-500/20">
+                <div className="absolute -top-3 -right-3 px-4 py-1 bg-purple-600 rounded-full text-[10px] font-black tracking-widest uppercase">
+                   {edu.period}
+                </div>
+                <h3 className="text-2xl font-black mb-1 group-hover:text-purple-400 transition-colors tracking-tighter uppercase">{edu.degree}</h3>
+                <p className="text-purple-500 font-bold mb-4">{edu.institution}</p>
+                <p className="text-gray-400 text-sm font-medium italic">{edu.details}</p>
+              </div>
+            </div>
+            
+            <div className="hidden md:block w-[45%] text-right px-10">
+               <div className="text-4xl font-black text-white/10 uppercase tracking-widest">Education</div>
             </div>
           </div>
         ))}
@@ -202,7 +234,7 @@ const ExperienceTimeline: React.FC = () => {
 };
 
 const RotatingHeader: React.FC = () => {
-  const words = ["high-performance", "scalable", "future-ready", "accessible", "robust", "optimized"];
+  const words = ["high-performance", "SEO-optimized", "scalable", "future-ready", "Core Web Vitals", "pixel-perfect"];
   const [index, setIndex] = useState(0);
 
   useEffect(() => {
@@ -222,6 +254,7 @@ const RotatingHeader: React.FC = () => {
 const App: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [aiForcedOpen, setAiForcedOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
@@ -231,7 +264,7 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#030712] text-gray-100 selection:bg-blue-500/30">
-      <FloatingAIChat />
+      <FloatingAIChat forcedOpen={aiForcedOpen} setForcedOpen={setAiForcedOpen} />
       
       {/* Navigation */}
       <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'bg-[#030712]/80 backdrop-blur-md border-b border-white/10 py-4' : 'bg-transparent py-6'}`}>
@@ -282,15 +315,15 @@ const App: React.FC = () => {
             <RotatingHeader /> code.
           </h1>
           <p className="max-w-2xl text-lg md:text-xl text-gray-400 mb-10 leading-relaxed font-light">
-            Crafting pixel-perfect, SEO-optimized, and ultra-fast web architectures 
-            at <span className="text-white font-medium">Prosperr.io</span> and previously at <span className="text-white font-medium">NoBroker.com</span>.
+            Crafting pixel-perfect, ultra-fast web architectures 
+            at <span className="text-white font-medium">Prosperr.io</span> and <span className="text-white font-medium">NoBroker.com</span>. Focused on LCP, CLS, and FID optimization.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
-            <a href="#contact" className="bg-blue-600 text-white px-8 py-4 rounded-full font-bold hover:bg-blue-500 transition-all flex items-center gap-2 shadow-lg shadow-blue-600/20 active:scale-95">
-              Hire Me <ChevronRight size={20} />
-            </a>
-            <a href="https://github.com/patelrohan224" target="_blank" className="bg-white/5 border border-white/10 px-8 py-4 rounded-full font-bold hover:bg-white/10 transition-all flex items-center gap-2 active:scale-95">
-              <Github size={20} /> Source Code
+            <button onClick={() => setAiForcedOpen(true)} className="bg-blue-600 text-white px-8 py-4 rounded-full font-bold hover:bg-blue-500 transition-all flex items-center gap-2 shadow-lg shadow-blue-600/20 active:scale-95">
+              Chat with My AI <MessageSquare size={20} />
+            </button>
+            <a href="#projects" className="bg-white/5 border border-white/10 px-8 py-4 rounded-full font-bold hover:bg-white/10 transition-all flex items-center gap-2 active:scale-95">
+              See My Works <ExternalLink size={20} />
             </a>
           </div>
         </div>
@@ -305,7 +338,7 @@ const App: React.FC = () => {
             {SKILL_CATEGORIES.map((cat, idx) => (
               <div key={idx} className="glass-card p-10 rounded-[2.5rem] hover:translate-y-[-8px] transition-all duration-300 text-left border-t border-white/5">
                 <div className="w-12 h-12 bg-blue-500/10 rounded-2xl flex items-center justify-center text-blue-500 mb-8 border border-blue-500/20">
-                   <Zap size={24} />
+                   {idx % 3 === 0 ? <Layout size={24} /> : idx % 3 === 1 ? <Zap size={24} /> : <Code2 size={24} />}
                 </div>
                 <h3 className="text-xl font-black mb-6 text-white uppercase tracking-widest">
                   {cat.title}
@@ -327,8 +360,8 @@ const App: React.FC = () => {
       <section id="experience" className="py-24 px-4 overflow-hidden">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-24">
-            <p className="text-blue-500 font-mono text-sm mb-4 uppercase tracking-[0.3em]">/ my story</p>
-            <h2 className="text-5xl md:text-7xl font-black tracking-tighter uppercase mb-4">Professional Journey</h2>
+            <p className="text-blue-500 font-mono text-sm mb-4 uppercase tracking-[0.3em]">/ professional history</p>
+            <h2 className="text-5xl md:text-7xl font-black tracking-tighter uppercase mb-4">The Journey</h2>
             <div className="w-24 h-2 bg-gradient-to-r from-blue-500 to-purple-500 mx-auto rounded-full"></div>
           </div>
           
@@ -341,23 +374,23 @@ const App: React.FC = () => {
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row justify-between items-center mb-20 gap-4">
             <div>
-              <p className="text-blue-500 font-mono text-sm mb-2 uppercase tracking-[0.3em]">/ experiments</p>
-              <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tighter">Lab & Works</h2>
+              <p className="text-blue-500 font-mono text-sm mb-2 uppercase tracking-[0.3em]">/ lab experiments</p>
+              <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tighter">Selected Works</h2>
             </div>
             <a href="https://github.com/patelrohan224" target="_blank" className="bg-white/5 px-6 py-3 rounded-2xl text-gray-300 hover:text-white transition-colors flex items-center gap-3 text-sm font-bold border border-white/10">
-              Explore Github <ExternalLink size={18} />
+              Explore Github <Github size={18} />
             </a>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-10">
             {PROJECTS.map((project, idx) => (
               <div key={idx} className="flex flex-col h-full glass-card rounded-[2.5rem] overflow-hidden group">
-                <div className="aspect-[4/3] bg-gray-800 relative overflow-hidden">
+                <div className="aspect-video bg-gray-800 relative overflow-hidden">
                   <img src={project.image} alt={project.title} className="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-700" />
                   <div className="absolute inset-0 bg-gradient-to-t from-[#030712] via-transparent to-transparent opacity-80"></div>
                   <div className="absolute top-6 left-6 flex flex-wrap gap-2">
-                    {project.tech.slice(0, 3).map(t => (
-                      <span key={t} className="bg-blue-600 text-white px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider">
+                    {project.tech.slice(0, 4).map(t => (
+                      <span key={t} className="bg-blue-600/20 backdrop-blur-md text-blue-400 border border-blue-500/30 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider">
                         {t}
                       </span>
                     ))}
@@ -365,12 +398,12 @@ const App: React.FC = () => {
                 </div>
                 <div className="p-10 flex flex-col flex-1">
                   <h3 className="text-3xl font-black mb-4 group-hover:text-blue-400 transition-colors uppercase tracking-tight">{project.title}</h3>
-                  <p className="text-gray-400 text-sm mb-8 leading-relaxed line-clamp-4 font-light">
+                  <p className="text-gray-400 text-sm mb-8 leading-relaxed font-light">
                     {project.description}
                   </p>
                   <div className="flex items-center justify-between mt-auto">
                     <a href={project.link} className="inline-flex items-center gap-3 text-xs font-black uppercase tracking-widest text-white hover:text-blue-400 transition-all group/link">
-                      Launch Project <ChevronRight size={16} className="group-hover/link:translate-x-1 transition-transform" />
+                      Launch Case Study <ChevronRight size={16} className="group-hover/link:translate-x-1 transition-transform" />
                     </a>
                   </div>
                 </div>
@@ -391,8 +424,8 @@ const App: React.FC = () => {
                 <span className="text-blue-500">exceptional.</span>
               </h2>
               <p className="text-xl text-gray-400 mb-12 font-light leading-relaxed">
-                Currently taking on interesting frontend architectural challenges and performance-driven products. 
-                Based in Bengaluru, available for global collaborations.
+                Currently building high-performance financial interfaces at Prosperr.io. 
+                Always open to technical discussions or collaborative builds.
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <a href="mailto:rohanpateloff@gmail.com" className="flex items-center gap-4 p-6 glass-card rounded-3xl hover:border-blue-500/50 transition-all group">
@@ -419,13 +452,13 @@ const App: React.FC = () => {
             <div className="flex gap-20">
               <div className="flex flex-col gap-6">
                 <h4 className="text-xs font-black uppercase tracking-[0.3em] text-blue-500">Socials</h4>
-                <a href="https://linkedin.com/in/patelrohan224" className="text-lg font-bold hover:text-white text-gray-400 transition-colors">LinkedIn</a>
-                <a href="https://github.com/patelrohan224" className="text-lg font-bold hover:text-white text-gray-400 transition-colors">GitHub</a>
+                <a href="https://linkedin.com/in/patelrohan224" target="_blank" className="text-lg font-bold hover:text-white text-gray-400 transition-colors">LinkedIn</a>
+                <a href="https://github.com/patelrohan224" target="_blank" className="text-lg font-bold hover:text-white text-gray-400 transition-colors">GitHub</a>
               </div>
               <div className="flex flex-col gap-6">
                 <h4 className="text-xs font-black uppercase tracking-[0.3em] text-blue-500">Navigate</h4>
                 <a href="#skills" className="text-lg font-bold hover:text-white text-gray-400 transition-colors">Skills</a>
-                <a href="#experience" className="text-lg font-bold hover:text-white text-gray-400 transition-colors">Experience</a>
+                <a href="#experience" className="text-lg font-bold hover:text-white text-gray-400 transition-colors">History</a>
                 <a href="#projects" className="text-lg font-bold hover:text-white text-gray-400 transition-colors">Works</a>
               </div>
             </div>
@@ -434,11 +467,11 @@ const App: React.FC = () => {
           <div className="flex flex-col md:flex-row justify-between items-center pt-12 border-t border-white/5 text-gray-500 text-[10px] font-mono uppercase tracking-[0.2em] gap-6">
             <div className="flex items-center gap-2">
                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-               Deploying Excellence: v2.0.25
+               Status: Actively Coding Performance
             </div>
-            <div>© {new Date().getFullYear()} Rohan Patel. Crafted with React & ❤️</div>
+            <div>© {new Date().getFullYear()} Rohan Patel. Handcrafted with React.</div>
             <div className="flex items-center gap-6">
-              <span className="flex items-center gap-2 text-blue-400"><Cpu size={14} /> Gemini-3-Flash</span>
+              <span className="flex items-center gap-2 text-blue-400"><Sparkles size={14} /> Powered by Gemini-3</span>
             </div>
           </div>
         </div>
