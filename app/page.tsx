@@ -67,7 +67,7 @@ const ThemeToggle: React.FC = () => {
 const PerformanceScorecard: React.FC = () => {
   const metrics = [
     { label: 'Performance', score: 100, color: 'text-green-500' },
-    { label: 'Accessibility', score: 100, color: 'text-green-500' },
+    { label: 'Accessibility', score: 89, color: 'text-green-500' },
     { label: 'Best Practices', score: 100, color: 'text-green-500' },
     { label: 'SEO', score: 100, color: 'text-green-500' },
   ];
