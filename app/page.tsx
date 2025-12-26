@@ -216,6 +216,7 @@ const FloatingAIChat: React.FC<{ forcedOpen?: boolean; setForcedOpen?: (v: boole
       ) : (
         <button 
           onClick={() => setIsOpen(true)}
+          name="consult ai agent"
           className="w-14 h-14 bg-blue-600 hover:bg-blue-500 rounded-full flex items-center justify-center text-white shadow-xl hover:scale-110 transition-all group relative"
         >
           <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 border-2 border-brand-light dark:border-brand-dark rounded-full"></div>
@@ -495,7 +496,7 @@ const App: React.FC = () => {
 
             <div className="md:hidden flex items-center gap-4">
               <ThemeToggle />
-              <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-slate-500 dark:text-gray-400">
+              <button name="menu" onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-slate-500 dark:text-gray-400">
                 {isMenuOpen ? <X size={28} /> : <Menu size={28} />}
               </button>
             </div>

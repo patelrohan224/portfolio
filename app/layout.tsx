@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: 'Rohan Patel | SDE-2 & Frontend Dev',
-  description: "",
+  description: "Crafting pixel-perfect architectures. Expert in Core Web Vitals, SSR optimization, and UI performance engineering.",
 };
 
 export default function RootLayout({
