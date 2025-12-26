@@ -118,7 +118,7 @@ const FloatingAIChat: React.FC<{ forcedOpen?: boolean; setForcedOpen?: (v: boole
     setMessages(prev => [...prev, { role: 'user', text: userMsg }]);
     setLoading(true);
 
-    try {
+    try { 
       const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
       const prompt = `
         You are Rohan Patel's Personal AI Agent. 
