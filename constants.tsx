@@ -79,6 +79,7 @@ export const PROJECTS: Project[] = [
     title: "JavaScript Compiler & Editor",
     description: "Online JavaScript Editor with custom engine support. Features an AST visualizer and memory visualization showcasing stack and heap memory allocations for learning JS internals.",
     tech: ["React.js", "Next.js", "Tailwind CSS", "Custom JS Engine"],
+    category: "Open Source",
     link: "https://github.com/patelrohan224",
     image: "https://images.unsplash.com/photo-1516116216624-53e697fedbea?q=80&w=2128&auto=format&fit=crop"
   },
@@ -86,13 +87,22 @@ export const PROJECTS: Project[] = [
     title: "Wealth & Tax Platforms",
     description: "Led frontend development for Mutual Fund onboarding, Super Saver tax journeys, and Reimbursement workflows with complex multi-step forms and document tracking.",
     tech: ["Next.js", "Redux-Saga", "Context API", "Styled-Components"],
+    category: "Fintech",
     image: "https://images.unsplash.com/photo-1611974714024-4607a55746ee?q=80&w=2070&auto=format&fit=crop"
   },
   {
     title: "Real Estate Ecosystems",
     description: "Built high-traffic platforms for Home Interiors and Renovation. Integrated CIBIL APIs, Comet Chat, and optimized for SEO using SSR/SSG best practices.",
     tech: ["React.js", "SSR", "GA/GTM", "Comet Chat", "Sentry"],
+    category: "Real Estate",
     image: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=1973&auto=format&fit=crop"
+  },
+  {
+    title: "Enterprise CRM Suite",
+    description: "Internal dashboarding tools for lead management and automated mail builders. Optimized for data-heavy interactions and spreadsheet synchronization.",
+    tech: ["React.js", "Redux Thunk", "Ant Design", "WebSockets"],
+    category: "Internal Tool",
+    image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2070&auto=format&fit=crop"
   }
 ];
 

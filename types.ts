@@ -24,6 +24,7 @@ export interface Project {
   title: string;
   description: string;
   tech: string[];
+  category: 'Fintech' | 'Real Estate' | 'Open Source' | 'Internal Tool';
   link?: string;
   github?: string;
   image?: string;

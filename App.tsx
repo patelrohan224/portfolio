@@ -24,11 +24,14 @@ import {
   Calendar,
   Clock,
   Sun,
-  Moon
+  Moon,
+  Search,
+  Filter,
+  CheckCircle2
 } from 'lucide-react';
 import { SKILL_CATEGORIES, EXPERIENCES, PROJECTS, EDUCATION_DATA, BLOGS } from './constants';
-import { GoogleGenAI } from '@google/genai';
-import { Blog } from './types';
+import { GoogleGenAI, GenerateContentResponse } from '@google/genai';
+import { Blog, Project } from './types';
 
 // Theme Toggle Component
 const ThemeToggle: React.FC = () => {
@@ -60,7 +63,35 @@ const ThemeToggle: React.FC = () => {
   );
 };
 
-// Persistent Floating AI Chat Component
+// Performance Metrics Component (Showcase Expertise)
+const PerformanceScorecard: React.FC = () => {
+  const metrics = [
+    { label: 'Performance', score: 100, color: 'text-green-500' },
+    { label: 'Accessibility', score: 100, color: 'text-green-500' },
+    { label: 'Best Practices', score: 100, color: 'text-green-500' },
+    { label: 'SEO', score: 100, color: 'text-green-500' },
+  ];
+
+  return (
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full max-w-4xl mx-auto mt-12 mb-8 animate-in fade-in slide-in-from-bottom-8 duration-1000">
+      {metrics.map((m) => (
+        <div key={m.label} className="glass-card p-4 rounded-2xl flex flex-col items-center justify-center border-slate-200 dark:border-white/10">
+          <div className={`text-2xl md:text-3xl font-black mb-1 ${m.color}`}>
+            {m.score}
+          </div>
+          <div className="text-[10px] uppercase font-black tracking-widest text-slate-500 dark:text-gray-500">
+            {m.label}
+          </div>
+          <div className="mt-2 w-full h-1 bg-slate-200 dark:bg-white/5 rounded-full overflow-hidden">
+            <div className="h-full bg-green-500 w-full animate-pulse"></div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+// Persistent Floating AI Chat Component with Streaming
 const FloatingAIChat: React.FC<{ forcedOpen?: boolean; setForcedOpen?: (v: boolean) => void }> = ({ forcedOpen, setForcedOpen }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState('');
@@ -80,7 +111,7 @@ const FloatingAIChat: React.FC<{ forcedOpen?: boolean; setForcedOpen?: (v: boole
 
   const handleAsk = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!query.trim()) return;
+    if (!query.trim() || loading) return;
 
     const userMsg = query;
     setQuery('');
@@ -98,14 +129,25 @@ const FloatingAIChat: React.FC<{ forcedOpen?: boolean; setForcedOpen?: (v: boole
         Answer professionally and concisely to this query about Rohan: "${userMsg}"
       `;
 
-      const result = await ai.models.generateContent({
+      const result = await ai.models.generateContentStream({
         model: 'gemini-3-flash-preview',
         contents: prompt,
       });
 
-      setMessages(prev => [...prev, { role: 'ai', text: result.text || "I'm having trouble connecting to my brain right now." }]);
+      let fullText = '';
+      setMessages(prev => [...prev, { role: 'ai', text: '' }]);
+      
+      for await (const chunk of result) {
+        const chunkText = chunk.text;
+        fullText += chunkText;
+        setMessages(prev => {
+          const newMsgs = [...prev];
+          newMsgs[newMsgs.length - 1] = { role: 'ai', text: fullText };
+          return newMsgs;
+        });
+      }
     } catch (err) {
-      setMessages(prev => [...prev, { role: 'ai', text: "API Error: I'm currently offline." }]);
+      setMessages(prev => [...prev, { role: 'ai', text: "API Error: I'm currently having a connection timeout." }]);
     } finally {
       setLoading(false);
     }
@@ -127,7 +169,7 @@ const FloatingAIChat: React.FC<{ forcedOpen?: boolean; setForcedOpen?: (v: boole
               </div>
               <div>
                 <h3 className="font-bold text-sm text-slate-900 dark:text-white">Rohan's AI Agent</h3>
-                <p className="text-[10px] text-blue-600 dark:text-blue-400 uppercase tracking-widest font-bold">Online</p>
+                <p className="text-[10px] text-blue-600 dark:text-blue-400 uppercase tracking-widest font-bold">Streaming Online</p>
               </div>
             </div>
             <button onClick={closeChat} className="text-slate-400 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white p-1">
@@ -139,31 +181,20 @@ const FloatingAIChat: React.FC<{ forcedOpen?: boolean; setForcedOpen?: (v: boole
             {messages.length === 0 && (
               <div className="text-center py-10 opacity-50">
                 <Sparkles size={32} className="mx-auto mb-2 text-blue-500" />
-                <p className="text-sm text-slate-500 dark:text-gray-400">Ask me about Rohan's skills or experience!</p>
+                <p className="text-sm text-slate-500 dark:text-gray-400">Ask about my React architecture or Core Web Vitals skills!</p>
               </div>
             )}
             {messages.map((m, i) => (
               <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                 <div className={`max-w-[85%] p-3 rounded-2xl text-sm ${
                   m.role === 'user' 
-                  ? 'bg-blue-600 text-white rounded-tr-none' 
+                  ? 'bg-blue-600 text-white rounded-tr-none shadow-lg shadow-blue-600/20' 
                   : 'bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-gray-200 rounded-tl-none'
                 }`}>
-                  {m.text}
+                  {m.text || (loading && m.role === 'ai' ? '...' : '')}
                 </div>
               </div>
             ))}
-            {loading && (
-              <div className="flex justify-start">
-                <div className="bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 p-3 rounded-2xl rounded-tl-none animate-pulse">
-                  <div className="flex gap-1">
-                    <div className="w-1.5 h-1.5 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce"></div>
-                    <div className="w-1.5 h-1.5 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce [animation-delay:0.2s]"></div>
-                    <div className="w-1.5 h-1.5 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce [animation-delay:0.4s]"></div>
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
 
           <form onSubmit={handleAsk} className="p-4 bg-white dark:bg-[#030712] border-t border-slate-100 dark:border-white/10 flex gap-2">
@@ -176,9 +207,9 @@ const FloatingAIChat: React.FC<{ forcedOpen?: boolean; setForcedOpen?: (v: boole
             />
             <button 
               disabled={loading}
-              className="bg-blue-600 hover:bg-blue-500 p-2 rounded-xl text-white disabled:opacity-50"
+              className="bg-blue-600 hover:bg-blue-500 p-2 rounded-xl text-white disabled:opacity-50 transition-colors"
             >
-              <Send size={18} />
+              {loading ? <Zap size={18} className="animate-spin" /> : <Send size={18} />}
             </button>
           </form>
         </div>
@@ -323,55 +354,72 @@ const BlogCard: React.FC<{ blog: Blog; onClick: () => void }> = ({ blog, onClick
 );
 
 const BlogDetailView: React.FC<{ blog: Blog; onBack: () => void }> = ({ blog, onBack }) => {
+  const [scrollProgress, setScrollProgress] = useState(0);
+
   useEffect(() => {
     window.scrollTo(0, 0);
+    const updateScroll = () => {
+      const winScroll = document.documentElement.scrollTop;
+      const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      const scrolled = (winScroll / height) * 100;
+      setScrollProgress(scrolled);
+    };
+    window.addEventListener('scroll', updateScroll);
+    return () => window.removeEventListener('scroll', updateScroll);
   }, []);
 
   return (
-    <div className="pt-32 pb-24 px-4 max-w-4xl mx-auto animate-in fade-in slide-in-from-bottom-4">
-      <button 
-        onClick={onBack}
-        className="flex items-center gap-2 text-slate-500 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white transition-colors mb-12 group"
-      >
-        <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" /> 
-        <span className="text-sm font-black uppercase tracking-widest">Back to Blogs</span>
-      </button>
-
-      <div className="mb-8 flex items-center gap-4">
-        <span className="px-4 py-1 bg-blue-500/10 text-blue-600 dark:text-blue-400 text-xs font-black uppercase tracking-widest rounded-full border border-blue-500/20">
-          {blog.category}
-        </span>
-        <div className="flex items-center gap-6 text-slate-500 dark:text-gray-500 text-xs font-black uppercase tracking-widest">
-          <span className="flex items-center gap-2"><Calendar size={14} /> {blog.date}</span>
-          <span className="flex items-center gap-2"><Clock size={14} /> {blog.readTime}</span>
-        </div>
+    <div className="animate-in fade-in slide-in-from-bottom-4">
+      {/* Reading Progress Bar */}
+      <div className="fixed top-0 left-0 w-full h-1 z-[60] bg-slate-200 dark:bg-white/5">
+        <div className="h-full bg-blue-600 transition-all duration-100" style={{ width: `${scrollProgress}%` }}></div>
       </div>
 
-      <h1 className="text-4xl md:text-6xl font-black mb-12 tracking-tighter leading-tight uppercase text-slate-900 dark:text-white">
-        {blog.title}
-      </h1>
+      <div className="pt-32 pb-24 px-4 max-w-4xl mx-auto">
+        <button 
+          onClick={onBack}
+          className="flex items-center gap-2 text-slate-500 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white transition-colors mb-12 group"
+        >
+          <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" /> 
+          <span className="text-sm font-black uppercase tracking-widest">Back to Blogs</span>
+        </button>
 
-      <div className="aspect-video rounded-[3rem] overflow-hidden mb-16 shadow-2xl border border-slate-200 dark:border-white/10">
-        <img src={blog.image} alt={blog.title} className="w-full h-full object-cover" />
-      </div>
-
-      <div className="prose dark:prose-invert prose-blue max-w-none">
-        <div className="text-xl text-slate-700 dark:text-gray-300 font-light leading-relaxed whitespace-pre-wrap">
-          {blog.content}
-        </div>
-      </div>
-
-      <div className="mt-20 pt-12 border-t border-slate-200 dark:border-white/10 flex flex-col md:flex-row items-center justify-between gap-8">
-        <div className="flex items-center gap-4">
-          <div className="w-16 h-16 rounded-full bg-blue-600 flex items-center justify-center font-black text-2xl text-white">R</div>
-          <div>
-            <p className="font-black uppercase tracking-widest text-slate-900 dark:text-white">Rohan Patel</p>
-            <p className="text-sm text-slate-500 dark:text-gray-500 uppercase tracking-widest font-black">SDE-2 @ Prosperr.io</p>
+        <div className="mb-8 flex items-center gap-4">
+          <span className="px-4 py-1 bg-blue-500/10 text-blue-600 dark:text-blue-400 text-xs font-black uppercase tracking-widest rounded-full border border-blue-500/20">
+            {blog.category}
+          </span>
+          <div className="flex items-center gap-6 text-slate-500 dark:text-gray-500 text-xs font-black uppercase tracking-widest">
+            <span className="flex items-center gap-2"><Calendar size={14} /> {blog.date}</span>
+            <span className="flex items-center gap-2"><Clock size={14} /> {blog.readTime}</span>
           </div>
         </div>
-        <div className="flex gap-4">
-           <a href="https://linkedin.com/in/patelrohan224" className="w-12 h-12 glass-card rounded-2xl flex items-center justify-center text-slate-600 dark:text-gray-400 hover:text-blue-500 transition-colors"><Linkedin size={20} /></a>
-           <a href="https://github.com/patelrohan224" className="w-12 h-12 glass-card rounded-2xl flex items-center justify-center text-slate-600 dark:text-gray-400 hover:text-blue-500 transition-colors"><Github size={20} /></a>
+
+        <h1 className="text-4xl md:text-6xl font-black mb-12 tracking-tighter leading-tight uppercase text-slate-900 dark:text-white">
+          {blog.title}
+        </h1>
+
+        <div className="aspect-video rounded-[3rem] overflow-hidden mb-16 shadow-2xl border border-slate-200 dark:border-white/10">
+          <img src={blog.image} alt={blog.title} className="w-full h-full object-cover" />
+        </div>
+
+        <div className="prose dark:prose-invert prose-blue max-w-none">
+          <div className="text-xl text-slate-700 dark:text-gray-300 font-light leading-relaxed whitespace-pre-wrap">
+            {blog.content}
+          </div>
+        </div>
+
+        <div className="mt-20 pt-12 border-t border-slate-200 dark:border-white/10 flex flex-col md:flex-row items-center justify-between gap-8">
+          <div className="flex items-center gap-4">
+            <div className="w-16 h-16 rounded-full bg-blue-600 flex items-center justify-center font-black text-2xl text-white shadow-lg shadow-blue-600/20">R</div>
+            <div>
+              <p className="font-black uppercase tracking-widest text-slate-900 dark:text-white">Rohan Patel</p>
+              <p className="text-sm text-slate-500 dark:text-gray-500 uppercase tracking-widest font-black">SDE-2 @ Prosperr.io</p>
+            </div>
+          </div>
+          <div className="flex gap-4">
+             <a href="https://linkedin.com/in/patelrohan224" className="w-12 h-12 glass-card rounded-2xl flex items-center justify-center text-slate-600 dark:text-gray-400 hover:text-blue-500 transition-colors"><Linkedin size={20} /></a>
+             <a href="https://github.com/patelrohan224" className="w-12 h-12 glass-card rounded-2xl flex items-center justify-center text-slate-600 dark:text-gray-400 hover:text-blue-500 transition-colors"><Github size={20} /></a>
+          </div>
         </div>
       </div>
     </div>
@@ -384,6 +432,7 @@ const App: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [aiForcedOpen, setAiForcedOpen] = useState(false);
+  const [activeFilter, setActiveFilter] = useState<string>('All');
   
   // Basic Navigation State
   const [view, setView] = useState<'portfolio' | 'blogs' | 'blog-detail'>('portfolio');
@@ -401,6 +450,11 @@ const App: React.FC = () => {
   };
 
   const selectedBlog = BLOGS.find(b => b.id === selectedBlogId);
+  const filteredProjects = activeFilter === 'All' 
+    ? PROJECTS 
+    : PROJECTS.filter(p => p.category === activeFilter);
+
+  const categories = ['All', ...new Set(PROJECTS.map(p => p.category))];
 
   return (
     <div className="min-h-screen bg-brand-light dark:bg-brand-dark text-slate-900 dark:text-gray-100 transition-theme selection:bg-blue-500/30">
@@ -471,22 +525,25 @@ const App: React.FC = () => {
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
                 </span>
-                SDE-2 • UI/UX Specialist
+                SDE-2 • Performance Architect
               </div>
               <h1 className="text-5xl md:text-8xl font-black mb-6 tracking-tight leading-[1.1] text-slate-900 dark:text-white">
                 Building scalable <br />
                 <RotatingHeader /> code.
               </h1>
-              <p className="max-w-2xl text-lg md:text-xl text-slate-600 dark:text-gray-400 mb-10 leading-relaxed font-light">
-                Crafting pixel-perfect, ultra-fast web architectures 
-                at <span className="text-slate-900 dark:text-white font-medium">Prosperr.io</span> and <span className="text-slate-900 dark:text-white font-medium">NoBroker.com</span>. Focused on LCP, CLS, and FID optimization.
+              <p className="max-w-2xl text-lg md:text-xl text-slate-600 dark:text-gray-400 mb-6 leading-relaxed font-light">
+                Crafting pixel-perfect architectures at <span className="text-slate-900 dark:text-white font-medium">Prosperr.io</span>. 
+                Expert in Core Web Vitals, SSR optimization, and UI performance engineering.
               </p>
-              <div className="flex flex-wrap justify-center gap-4">
-                <button onClick={() => setAiForcedOpen(true)} className="bg-blue-600 text-white px-8 py-4 rounded-full font-bold hover:bg-blue-500 transition-all flex items-center gap-2 shadow-lg shadow-blue-600/20 active:scale-95">
-                  Chat with My AI <MessageSquare size={20} />
+              
+              <PerformanceScorecard />
+
+              <div className="flex flex-wrap justify-center gap-4 mt-8">
+                <button onClick={() => setAiForcedOpen(true)} className="bg-blue-600 text-white px-8 py-4 rounded-full font-bold hover:bg-blue-500 transition-all flex items-center gap-2 shadow-lg shadow-blue-600/30 active:scale-95">
+                  Consult AI Agent <MessageSquare size={20} />
                 </button>
                 <button onClick={() => setView('blogs')} className="bg-slate-200/50 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white px-8 py-4 rounded-full font-bold hover:bg-slate-200 dark:hover:bg-white/10 transition-all flex items-center gap-2 active:scale-95">
-                  Read My Blogs <BookOpen size={20} />
+                  Insights & Blogs <BookOpen size={20} />
                 </button>
               </div>
             </div>
@@ -495,12 +552,12 @@ const App: React.FC = () => {
           {/* Skills */}
           <section id="skills" className="py-24 px-4 bg-slate-100/50 dark:bg-gray-900/30">
             <div className="max-w-7xl mx-auto text-center">
-              <p className="text-blue-600 dark:text-blue-500 font-mono text-sm mb-4 uppercase tracking-[0.3em]">/ core stack</p>
+              <p className="text-blue-600 dark:text-blue-500 font-mono text-sm mb-4 uppercase tracking-[0.3em]">/ technical arsenal</p>
               <h2 className="text-4xl md:text-6xl font-black mb-20 uppercase tracking-tighter text-slate-900 dark:text-white">Stack & Expertise</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {SKILL_CATEGORIES.map((cat, idx) => (
-                  <div key={idx} className="glass-card p-10 rounded-[2.5rem] hover:translate-y-[-8px] transition-all duration-300 text-left border-t border-slate-200 dark:border-white/5">
-                    <div className="w-12 h-12 bg-blue-500/10 rounded-2xl flex items-center justify-center text-blue-600 dark:text-blue-500 mb-8 border border-blue-500/20">
+                  <div key={idx} className="glass-card p-10 rounded-[2.5rem] hover:translate-y-[-8px] transition-all duration-300 text-left border-t border-slate-200 dark:border-white/5 group">
+                    <div className="w-12 h-12 bg-blue-500/10 rounded-2xl flex items-center justify-center text-blue-600 dark:text-blue-500 mb-8 border border-blue-500/20 group-hover:bg-blue-600 group-hover:text-white transition-all">
                        {idx % 3 === 0 ? <Layout size={24} /> : idx % 3 === 1 ? <Zap size={24} /> : <Code2 size={24} />}
                     </div>
                     <h3 className="text-xl font-black mb-6 text-slate-900 dark:text-white uppercase tracking-widest">
@@ -523,48 +580,66 @@ const App: React.FC = () => {
           <section id="experience" className="py-24 px-4 overflow-hidden">
             <div className="max-w-7xl mx-auto">
               <div className="text-center mb-24">
-                <p className="text-blue-600 dark:text-blue-500 font-mono text-sm mb-4 uppercase tracking-[0.3em]">/ professional history</p>
+                <p className="text-blue-600 dark:text-blue-500 font-mono text-sm mb-4 uppercase tracking-[0.3em]">/ career path</p>
                 <h2 className="text-5xl md:text-7xl font-black tracking-tighter uppercase mb-4 text-slate-900 dark:text-white">The Journey</h2>
-                <div className="w-24 h-2 bg-gradient-to-r from-blue-500 to-purple-500 mx-auto rounded-full"></div>
+                <div className="w-24 h-2 bg-gradient-to-r from-blue-500 to-purple-500 mx-auto rounded-full shadow-[0_0_10px_rgba(59,130,246,0.5)]"></div>
               </div>
               <ExperienceTimeline />
             </div>
           </section>
 
-          {/* Featured Projects */}
+          {/* Featured Projects with Filtering */}
           <section id="projects" className="py-24 px-4 bg-slate-100/50 dark:bg-gray-900/30">
             <div className="max-w-7xl mx-auto">
-              <div className="flex flex-col md:flex-row justify-between items-center mb-20 gap-4 text-slate-900 dark:text-white">
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-16 gap-8 text-slate-900 dark:text-white">
                 <div>
-                  <p className="text-blue-600 dark:text-blue-500 font-mono text-sm mb-2 uppercase tracking-[0.3em]">/ lab experiments</p>
-                  <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tighter">Selected Works</h2>
+                  <p className="text-blue-600 dark:text-blue-500 font-mono text-sm mb-2 uppercase tracking-[0.3em]">/ case studies</p>
+                  <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tighter">Impactful Work</h2>
                 </div>
-                <a href="https://github.com/patelrohan224" target="_blank" className="bg-slate-200/50 dark:bg-white/5 px-6 py-3 rounded-2xl text-slate-600 dark:text-gray-300 hover:text-slate-900 dark:hover:text-white transition-colors flex items-center gap-3 text-sm font-bold border border-slate-200 dark:border-white/10">
-                  Explore Github <Github size={18} />
-                </a>
+                
+                {/* Filter Controls */}
+                <div className="flex flex-wrap gap-2">
+                  {categories.map(cat => (
+                    <button 
+                      key={cat}
+                      onClick={() => setActiveFilter(cat)}
+                      className={`px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${
+                        activeFilter === cat 
+                        ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' 
+                        : 'bg-slate-200/50 dark:bg-white/5 text-slate-500 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white'
+                      }`}
+                    >
+                      {cat}
+                    </button>
+                  ))}
+                </div>
               </div>
+
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-10">
-                {PROJECTS.map((project, idx) => (
-                  <div key={idx} className="flex flex-col h-full glass-card rounded-[2.5rem] overflow-hidden group">
+                {filteredProjects.map((project, idx) => (
+                  <div key={project.title} className="flex flex-col h-full glass-card rounded-[2.5rem] overflow-hidden group animate-in fade-in zoom-in-95 duration-500">
                     <div className="aspect-video bg-slate-200 dark:bg-gray-800 relative overflow-hidden">
                       <img src={project.image} alt={project.title} className="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-700" />
                       <div className="absolute inset-0 bg-gradient-to-t from-slate-100 dark:from-[#030712] via-transparent to-transparent opacity-60 dark:opacity-80 transition-theme"></div>
                       <div className="absolute top-6 left-6 flex flex-wrap gap-2">
-                        {project.tech.slice(0, 4).map(t => (
-                          <span key={t} className="bg-blue-600/20 backdrop-blur-md text-blue-700 dark:text-blue-400 border border-blue-500/30 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider">
-                            {t}
-                          </span>
-                        ))}
+                        <span className="bg-blue-600 text-white px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest shadow-lg">
+                          {project.category}
+                        </span>
                       </div>
                     </div>
                     <div className="p-10 flex flex-col flex-1">
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        {project.tech.map(t => (
+                          <span key={t} className="text-[10px] font-bold text-slate-500 dark:text-blue-400">#{t}</span>
+                        ))}
+                      </div>
                       <h3 className="text-3xl font-black mb-4 text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors uppercase tracking-tight">{project.title}</h3>
                       <p className="text-slate-600 dark:text-gray-400 text-sm mb-8 leading-relaxed font-light">
                         {project.description}
                       </p>
                       <div className="flex items-center justify-between mt-auto">
                         <a href={project.link} className="inline-flex items-center gap-3 text-xs font-black uppercase tracking-widest text-slate-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-all group/link">
-                          Launch Case Study <ChevronRight size={16} className="group-hover/link:translate-x-1 transition-transform" />
+                          Explore Product <ExternalLink size={16} className="group-hover/link:translate-y-[-2px] transition-transform" />
                         </a>
                       </div>
                     </div>
@@ -580,14 +655,14 @@ const App: React.FC = () => {
             <div className="max-w-7xl mx-auto">
               <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-6 text-slate-900 dark:text-white">
                 <div>
-                  <p className="text-blue-600 dark:text-blue-500 font-mono text-sm mb-2 uppercase tracking-[0.3em]">/ knowledge sharing</p>
-                  <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tighter">Recent Articles</h2>
+                  <p className="text-blue-600 dark:text-blue-500 font-mono text-sm mb-2 uppercase tracking-[0.3em]">/ shared wisdom</p>
+                  <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tighter">Latest Thinking</h2>
                 </div>
                 <button 
                   onClick={() => setView('blogs')}
                   className="px-8 py-3 bg-slate-200/50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-slate-200 dark:hover:bg-white/10 transition-all"
                 >
-                  View All Blogs
+                  View All Articles
                 </button>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -605,12 +680,11 @@ const App: React.FC = () => {
               <div className="flex flex-col lg:flex-row justify-between items-start gap-16 mb-24 text-slate-900 dark:text-white">
                 <div className="max-w-2xl">
                   <h2 className="text-5xl md:text-7xl font-black mb-8 uppercase tracking-tighter leading-none">
-                    Let's build something <br />
-                    <span className="text-blue-600 dark:text-blue-500">exceptional.</span>
+                    Let's scale <br />
+                    <span className="text-blue-600 dark:text-blue-500">together.</span>
                   </h2>
                   <p className="text-xl text-slate-600 dark:text-gray-400 mb-12 font-light leading-relaxed">
-                    Currently building high-performance financial interfaces at Prosperr.io. 
-                    Always open to technical discussions or collaborative builds.
+                    Based in Bengaluru, building for the globe. Available for architecture consulting and high-impact engineering roles.
                   </p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <a href="mailto:rohanpateloff@gmail.com" className="flex items-center gap-4 p-6 glass-card rounded-3xl hover:border-blue-500/50 transition-all group">
@@ -618,7 +692,7 @@ const App: React.FC = () => {
                         <Mail size={24} />
                       </div>
                       <div>
-                        <p className="text-[10px] font-black text-slate-400 dark:text-gray-500 uppercase tracking-widest">Write to me</p>
+                        <p className="text-[10px] font-black text-slate-400 dark:text-gray-500 uppercase tracking-widest">Inbox</p>
                         <p className="font-bold truncate text-slate-900 dark:text-white">rohanpateloff@gmail.com</p>
                       </div>
                     </a>
@@ -651,11 +725,11 @@ const App: React.FC = () => {
               <div className="flex flex-col md:flex-row justify-between items-center pt-12 border-t border-slate-200 dark:border-white/5 text-slate-500 dark:text-gray-500 text-[10px] font-mono uppercase tracking-[0.2em] gap-6">
                 <div className="flex items-center gap-2">
                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                   Status: Actively Coding Performance
+                   Performance Health: Excellent
                 </div>
                 <div>© {new Date().getFullYear()} Rohan Patel. Handcrafted with React.</div>
                 <div className="flex items-center gap-6">
-                  <span className="flex items-center gap-2 text-blue-600 dark:text-blue-400 font-bold"><Sparkles size={14} /> Powered by Gemini-3</span>
+                  <span className="flex items-center gap-2 text-blue-600 dark:text-blue-400 font-bold"><Sparkles size={14} /> Powered by Gemini-3 Flash Streaming</span>
                 </div>
               </div>
             </div>
@@ -664,24 +738,16 @@ const App: React.FC = () => {
       ) : view === 'blogs' ? (
         <main className="pt-32 pb-24 px-4 max-w-7xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
           <div className="mb-20 text-center text-slate-900 dark:text-white">
-            <p className="text-blue-600 dark:text-blue-500 font-mono text-sm mb-4 uppercase tracking-[0.3em]">/ articles & insights</p>
-            <h1 className="text-5xl md:text-7xl font-black tracking-tighter uppercase mb-6">The Blog</h1>
+            <p className="text-blue-600 dark:text-blue-500 font-mono text-sm mb-4 uppercase tracking-[0.3em]">/ thoughts on scale</p>
+            <h1 className="text-5xl md:text-7xl font-black tracking-tighter uppercase mb-6 text-slate-900 dark:text-white">The Blog</h1>
             <p className="text-slate-600 dark:text-gray-400 max-w-2xl mx-auto font-light leading-relaxed">
-              Sharing my experiences in performance tuning, React architecture, and building user-centric financial platforms.
+              Engineering deep-dives into frontend performance, architectural patterns, and real-world fintech challenges.
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {BLOGS.map(blog => (
               <BlogCard key={blog.id} blog={blog} onClick={() => navigateToBlog(blog.id)} />
             ))}
-          </div>
-          <div className="mt-32 text-center p-20 glass-card rounded-[3rem] border-dashed border-2 border-slate-200 dark:border-white/10 text-slate-900 dark:text-white">
-             <h3 className="text-2xl font-black uppercase tracking-tight mb-4">Subscribe for Updates</h3>
-             <p className="text-slate-600 dark:text-gray-400 mb-8 max-w-md mx-auto">Get notified when I release new articles on performance and frontend architecture.</p>
-             <form className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
-               <input type="email" placeholder="email@example.com" className="bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl px-6 py-3 flex-1 focus:outline-none focus:border-blue-500 transition-all text-slate-900 dark:text-white" />
-               <button className="bg-blue-600 px-8 py-3 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-blue-500 text-white transition-all">Join</button>
-             </form>
           </div>
         </main>
       ) : (
