@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next"
 import "./globals.css";
 
 const geistSans = Geist({
@@ -13,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Rohan Patel | SDE-2 & Frontend Dev',
-  description: "Crafting pixel-perfect architectures. Expert in Core Web Vitals, SSR optimization, and UI performance engineering.",
+  title: 'Rohan Patel | Senior Frontend Engineer',
+  description: "Building scalable, high-performance web applications. Specialized in Core Web Vitals optimization, server-side rendering, and frontend performance engineering.",
 };
 
 export default function RootLayout({
@@ -28,6 +29,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         {children}
+        <Analytics />
       </body>
     </html>
   );
