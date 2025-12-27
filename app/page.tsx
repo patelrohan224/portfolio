@@ -166,8 +166,8 @@ const App: React.FC = () => {
             {/* Featured Projects with Filtering */}
             <section id="projects" className="py-24 px-4 bg-slate-100/50 dark:bg-gray-900/30">
               <div className="max-w-7xl mx-auto">
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-16 gap-8 text-slate-900 dark:text-white">
-                  <div>
+                <div className="flex flex-col md:flex-row justify-between items-center md:items-center mb-16 gap-8 text-slate-900 dark:text-white">
+                  <div className="text-center md:text-start">
                     <p className="text-blue-600 dark:text-blue-500 font-mono text-sm mb-2 uppercase tracking-[0.3em]">/ case studies</p>
                     <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tighter">Impactful Work</h2>
                   </div>
@@ -229,8 +229,8 @@ const App: React.FC = () => {
             <section id="blog" className="py-24 px-4 bg-brand-light dark:bg-brand-dark relative overflow-hidden">
               <div className="absolute top-1/2 right-0 w-[500px] h-[500px] bg-purple-600/5 blur-[120px] rounded-full -z-10"></div>
               <div className="max-w-7xl mx-auto">
-                <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-6 text-slate-900 dark:text-white">
-                  <div>
+                <div className="flex flex-col md:flex-row justify-between items-center mb-16 gap-6 text-slate-900 dark:text-white">
+                  <div className="text-center md:text-start">
                     <p className="text-blue-600 dark:text-blue-500 font-mono text-sm mb-2 uppercase tracking-[0.3em]">/ shared wisdom</p>
                     <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tighter">Latest Thinking</h2>
                   </div>

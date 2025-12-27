@@ -50,7 +50,7 @@ export const SKILL_CATEGORIES: SkillCategory[] = [
 
 export const EXPERIENCES: Experience[] = [
   {
-    role: "SDE - 2",
+    role: "Software Development Engineer - 2",
     company: "Prosperr.io",
     location: "Bengaluru",
     period: "Feb 2025 – Present",

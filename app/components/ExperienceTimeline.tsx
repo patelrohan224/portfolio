@@ -11,8 +11,8 @@ const ExperienceTimeline: React.FC = () => {
 
       <div className="space-y-24">
         {EXPERIENCES.map((exp, idx) => (
-          <div key={idx} className={`relative flex flex-col md:flex-row items-center justify-between w-full ${idx % 2 === 0 ? 'md:flex-row-reverse' : ''}`}>
-            <div className="absolute left-6 md:left-1/2 md:-translate-x-1/2 top-0 w-12 h-12 bg-brand-light dark:bg-brand-dark border-2 border-blue-500 rounded-full z-10 flex items-center justify-center shadow-[0_0_15px_rgba(59,130,246,0.3)]">
+          <div key={idx} className={`relative flex flex-col md:flex-row items-center justify-between w-[90%] md:w-full ${idx % 2 === 0 ? 'md:flex-row-reverse' : ''}`}>
+            <div className="absolute left-0 md:left-1/2 md:-translate-x-1/2 top-0 w-12 h-12 bg-brand-light dark:bg-brand-dark border-2 border-blue-500 rounded-full z-10 flex items-center justify-center shadow-[0_0_15px_rgba(59,130,246,0.3)]">
                <span className="text-blue-500 font-black text-xs">{EXPERIENCES.length - idx}</span>
             </div>
 
@@ -56,8 +56,8 @@ const ExperienceTimeline: React.FC = () => {
         
         {/* Education Timeline Entry */}
         {EDUCATION_DATA.map((edu, idx) => (
-          <div key={`edu-${idx}`} className={`relative flex flex-col md:flex-row items-center justify-between w-full ${idx % 2 !== 0 ? 'md:flex-row-reverse' : ''}`}>
-            <div className="absolute left-6 md:left-1/2 md:-translate-x-1/2 top-0 w-12 h-12 bg-brand-light dark:bg-brand-dark border-2 border-purple-500 rounded-full z-10 flex items-center justify-center shadow-[0_0_15px_rgba(168,85,247,0.3)]">
+          <div key={`edu-${idx}`} className={`relative flex flex-col md:flex-row items-center justify-between w-[90%] md:w-full ${idx % 2 !== 0 ? 'md:flex-row-reverse' : ''}`}>
+            <div className="absolute left-0 md:left-1/2 md:-translate-x-1/2 top-0 w-12 h-12 bg-brand-light dark:bg-brand-dark border-2 border-purple-500 rounded-full z-10 flex items-center justify-center shadow-[0_0_15px_rgba(168,85,247,0.3)]">
                <GraduationCap size={20} className="text-purple-500" />
             </div>
 
