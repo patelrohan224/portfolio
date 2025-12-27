@@ -287,12 +287,12 @@ const App: React.FC = () => {
                   <div className="flex gap-20">
                     <div className="flex flex-col gap-6">
                       <h3 className="text-xs font-black uppercase tracking-[0.3em] text-blue-600 dark:text-blue-500">Socials</h3>
-                      <a href="https://www.linkedin.com/in/rohan-patel-dev" target="_blank" className="text-lg font-bold hover:text-slate-900 dark:hover:text-white text-slate-500 dark:text-gray-400 transition-colors">LinkedIn</a>
-                      <a href="https://github.com/patelrohan224" target="_blank" className="text-lg font-bold hover:text-slate-900 dark:hover:text-white text-slate-500 dark:text-gray-400 transition-colors">GitHub</a>
+                      <a href="https://www.linkedin.com/in/rohan-patel-dev" target="_blank" className="text-lg font-bold hover:text-slate-900 dark:hover:text-white text-slate-600 dark:text-gray-300 transition-colors">LinkedIn</a>
+                      <a href="https://github.com/patelrohan224" target="_blank" className="text-lg font-bold hover:text-slate-900 dark:hover:text-white text-slate-600 dark:text-gray-300 transition-colors">GitHub</a>
                     </div>
                     <div className="flex flex-col gap-6">
                       <h3 className="text-xs font-black uppercase tracking-[0.3em] text-blue-600 dark:text-blue-500">Navigate</h3>
-                      <a href="#skills" className="text-lg font-bold hover:text-slate-900 dark:hover:text-white text-slate-500 dark:text-gray-400 transition-colors">Skills</a>
+                      <a href="#skills" className="text-lg font-bold hover:text-slate-900 dark:hover:text-white text-slate-600 dark:text-gray-300 transition-colors">Skills</a>
                       <a href="#experience" className="text-lg font-bold hover:text-slate-900 dark:hover:text-white text-slate-600 dark:text-gray-300 transition-colors">History</a>
                       <a href="#projects" className="text-lg font-bold hover:text-slate-900 dark:hover:text-white text-slate-600 dark:text-gray-300 transition-colors">Works</a>
                     </div>

@@ -58,9 +58,7 @@ const BlogDetailView: React.FC<BlogDetailViewProps> = ({ blog, onBack }) => {
         </div>
 
         <div className="prose dark:prose-invert prose-blue max-w-none">
-          <div className="text-xl text-slate-700 dark:text-gray-300 font-light leading-relaxed whitespace-pre-wrap">
-            {blog.content}
-          </div>
+          {blog.content}
         </div>
 
         <div className="mt-20 pt-12 border-t border-slate-200 dark:border-white/10 flex flex-col md:flex-row items-center justify-between gap-8">
