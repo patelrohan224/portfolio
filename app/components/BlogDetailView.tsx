@@ -66,7 +66,7 @@ const BlogDetailView: React.FC<BlogDetailViewProps> = ({ blog, onBack }) => {
             <div className="w-16 h-16 rounded-full bg-blue-600 flex items-center justify-center font-black text-2xl text-white shadow-lg shadow-blue-600/20">R</div>
             <div>
               <p className="font-black uppercase tracking-widest text-slate-900 dark:text-white">Rohan Patel</p>
-              <p className="text-sm text-slate-500 dark:text-gray-500 uppercase tracking-widest font-black">SDE-2</p>
+              <p className="text-sm text-slate-500 dark:text-gray-500 uppercase tracking-widest font-black">SDE-2 • Frontend Engineer</p>
             </div>
           </div>
           <div className="flex gap-4">
