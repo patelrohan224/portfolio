@@ -33,7 +33,7 @@ export interface Blog {
   id: string;
   title: string;
   summary: string;
-  content: string;
+  content: React.ReactNode;
   date: string;
   readTime: string;
   category: string;
