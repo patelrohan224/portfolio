@@ -4,12 +4,13 @@ import { generateSlug } from './utils/slug'
 import { Blog } from './types'
  
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
   
-  const blogEntries = BLOGS.map((blog: Blog) => ({
+  // Explicitly typing this as MetadataRoute.Sitemap solves the type mismatch
+  const blogEntries: MetadataRoute.Sitemap = BLOGS.map((blog: Blog) => ({
     url: `${baseUrl}/${generateSlug(blog.title)}`,
     lastModified: new Date(blog.date),
-    changeFrequency: 'monthly',
+    changeFrequency: "monthly",
     priority: 0.8,
   }));
  
