@@ -8,7 +8,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   
   // Explicitly typing this as MetadataRoute.Sitemap solves the type mismatch
   const blogEntries: MetadataRoute.Sitemap = BLOGS.map((blog: Blog) => ({
-    url: `${baseUrl}/${generateSlug(blog.title)}`,
+    url: `${baseUrl}/blog/${generateSlug(blog.title)}`,
     lastModified: new Date(blog.date),
     changeFrequency: "monthly",
     priority: 0.8,
